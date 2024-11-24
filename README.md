@@ -2,7 +2,7 @@ This is a new [**React Native**](https://reactnative.dev) project, bootstrapped 
 
 # Getting Started
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+> **Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
 
 ## Step 1: Start the Metro Server
 
@@ -55,25 +55,41 @@ Now that you have successfully run the app, let's modify it.
 
    For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
 
-## Congratulations! :tada:
+## Folder Structure!
 
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+📂 ProductSearchApp
+├── 📂 android # Android-specific files (auto-generated)
+├── 📂 ios # iOS-specific files (auto-generated)
+├── 📂 src # Main app source code
+│ ├── 📂 api # API layer for Axios configurations and API calls
+│ │ ├── apiClient.ts # Axios instance configuration
+│ │ └── productApi.ts # API functions for products and categories
+│ ├── 📂 components # Reusable UI components
+│ │ ├── CategoryCard.tsx
+│ │ ├── ProductCard.tsx
+│ │ └── SearchBar.tsx
+│ ├── 📂 hooks # Custom hooks (React Query hooks, search history, etc.)
+│ │ ├── useProducts.ts
+│ │ ├── useCategories.ts
+│ │ └── useSearchHistory.ts
+│ ├── 📂 navigation # Navigation configurations and stack/screens
+│ │ └── AppNavigator.tsx
+│ ├── 📂 screens # Screen components for different app views
+│ │ ├── HomeScreen.tsx
+│ │ ├── SearchScreen.tsx
+│ │ └── ProductDetailsScreen.tsx
+│ ├── 📂 state # State management (React Query providers, context, etc.)
+│ │ └── queryClient.ts # React Query client setup
+│ ├── 📂 utils # Utility functions/helpers
+│ │ ├── categoryMapping.ts # Maps API categories to UI categories
+│ │ └── constants.ts # Constants like API base URLs, app colors, etc.
+│ ├── 📂 assets # Static assets like images, fonts, etc.
+│ │ ├── images # App images (icons, placeholders, etc.)
+│ │ └── fonts # Custom fonts (if applicable)
+│ └── App.tsx # Entry point of the app
+├── 📂 node_modules # Node modules (auto-generated)
+├── .gitignore # Git ignore file
+├── package.json # Project dependencies and scripts
+├── README.md # Project documentation
+├── tsconfig.json # TypeScript configuration
+└── babel.config.js # Babel configuration
