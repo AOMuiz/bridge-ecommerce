@@ -7,8 +7,9 @@
       "@api/*": ["src/api/*"],
       "@assets/*": ["src/assets/*"],
       "@styles/*": ["src/styles/*"],
+      "@hooks/*": ["src/hooks/*"],
       "@components/*": ["src/components/*"],
-      "@navigations/*": ["src/navigations/*"],
+      "@navigation/*": ["src/navigation/*"],
       "@screens/*": ["src/screens/*"],
       "@theme/*": ["src/theme/*"],
       "@utils/*": ["src/utils/*"]

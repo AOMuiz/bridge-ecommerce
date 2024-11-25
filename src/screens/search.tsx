@@ -1,214 +1,141 @@
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 import {
   View,
-  Text,
-  TextInput,
   StyleSheet,
-  ScrollView,
-  TouchableOpacity,
+  ActivityIndicator,
+  FlatList,
+  Text,
 } from 'react-native';
+
+import ProductCard from '@components/product-card';
+import CategoryCard from '@components/category-card';
+import {useSearch} from '@hooks/useSearch';
+import SearchBar from '@components/search-bar';
+import {Category, Products} from 'src/types/products';
 import {useQuery} from '@tanstack/react-query';
 import axios from 'axios';
-import CategoryCard from '@components/category-card';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import ProductCard from '@components/product-card';
-import {globalStyles} from '@styles/global';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import useCart from '@hooks/useCart';
+import {API_URL} from '@api/api-client';
 
-const categoryMapping = {
-  electronics: 'Fresh Fruits & Vegetable',
-  jewelery: 'Cooking Oil & Ghee',
-  "men's clothing": 'Meat & Fish',
-  "women's clothing": 'Bakery & Snacks',
-};
+const SearchScreen = () => {
+  const {searchText, setSearchText, searchHistory, handleSearch, clearHistory} =
+    useSearch();
+  const {addToCart} = useCart();
 
-const Search = () => {
-  const [searchText, setSearchText] = useState('');
-  const [searchHistory, setSearchHistory] = useState<string[]>([]);
-
-  const {data: categories} = useQuery({
+  const {data: categories, isLoading: isCategoriesLoading} = useQuery<
+    Category[]
+  >({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await axios.get(
-        'https://fakestoreapi.com/products/categories',
+      const response = await axios.get<Category[]>(
+        `${API_URL}/products/categories`,
       );
       return response.data;
     },
   });
 
-  const {data: products} = useQuery({
+  const {data: products, isLoading: isProductsLoading} = useQuery<Products>({
     queryKey: ['products'],
     queryFn: async () => {
-      const response = await axios.get('https://fakestoreapi.com/products');
+      const response = await axios.get<Products>(`${API_URL}/products`);
       return response.data;
     },
   });
 
-  useEffect(() => {
-    loadSearchHistory();
-  }, []);
-
-  const loadSearchHistory = async () => {
-    try {
-      const history = await AsyncStorage.getItem('searchHistory');
-      if (history) {
-        setSearchHistory(JSON.parse(history));
-      }
-    } catch (error) {
-      console.error('Error loading search history:', error);
-    }
-  };
-
-  const saveSearchHistory = async (term: string) => {
-    try {
-      const newHistory = [term, ...searchHistory.filter(h => h !== term)].slice(
-        0,
-        5,
-      );
-      await AsyncStorage.setItem('searchHistory', JSON.stringify(newHistory));
-      setSearchHistory(newHistory);
-    } catch (error) {
-      console.error('Error saving search history:', error);
-    }
-  };
-
-  const handleSearch = (text: string) => {
-    setSearchText(text);
-    if (text.trim()) {
-      saveSearchHistory(text.trim());
-    }
-  };
-
-  const clearHistory = async () => {
-    try {
-      await AsyncStorage.removeItem('searchHistory');
-      setSearchHistory([]);
-    } catch (error) {
-      console.error('Error clearing search history:', error);
-    }
-  };
+  // Filter products based on search text
+  const filteredProducts = products?.filter(
+    product =>
+      product.title.toLowerCase().includes(searchText.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchText.toLowerCase()),
+  );
 
   return (
-    <ScrollView style={globalStyles.container}>
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Rice"
-          value={searchText}
-          onChangeText={handleSearch}
-          placeholderTextColor="#9E9E9E"
-        />
-      </View>
+    <SafeAreaView style={styles.container}>
+      {/* Search Bar */}
+      <SearchBar
+        searchText={searchText}
+        setSearchText={setSearchText}
+        searchHistory={searchHistory}
+        onSearch={handleSearch}
+        onClearHistory={clearHistory}
+      />
 
-      <View style={styles.historyContainer}>
-        <View style={styles.historyHeader}>
-          <Text style={styles.historyTitle}>Search History</Text>
-          <TouchableOpacity onPress={clearHistory}>
-            <Text style={styles.clearButton}>clear</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.historyTags}>
-          {searchHistory.map((term, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.historyTag}
-              onPress={() => setSearchText(term)}>
-              <Text style={styles.historyTagText}>{term}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      <View style={styles.categoriesGrid}>
-        {categories?.map((category: string, index: number) => (
-          <CategoryCard
-            key={index}
-            title={categoryMapping[category]}
-            image={`/category-${index + 1}.png`}
+      {/* Combined FlatList for Categories and Products */}
+      <FlatList
+        data={filteredProducts || []}
+        keyExtractor={item =>
+          item?.id ? `product-${item.id}` : `category-${item}`
+        }
+        numColumns={2}
+        contentContainerStyle={styles.contentContainer}
+        ListHeaderComponent={
+          <FlatList
+            data={categories}
+            keyExtractor={(item, index) => `${item}-${index}`}
+            numColumns={2}
+            renderItem={({item}) => (
+              <View style={styles.categoryItem}>
+                <CategoryCard title={item} image={`../assets/${item}.jpg`} />
+              </View>
+            )}
+            contentContainerStyle={styles.categoriesGrid}
+            ListEmptyComponent={
+              isCategoriesLoading ? (
+                <ActivityIndicator size="large" color="#00A651" />
+              ) : (
+                <Text style={styles.emptyText}>No categories found</Text>
+              )
+            }
           />
-        ))}
-      </View>
-
-      {searchText && (
-        <View style={styles.searchResults}>
-          {products
-            ?.filter(
-              product =>
-                product.title
-                  .toLowerCase()
-                  .includes(searchText.toLowerCase()) ||
-                product.category
-                  .toLowerCase()
-                  .includes(searchText.toLowerCase()),
-            )
-            .map((product, index) => (
-              <ProductCard
-                key={index}
-                title={product.title}
-                price={product.price}
-                image={product.image}
-                location="Kigadi Market Kaduna State"
-              />
-            ))}
-        </View>
-      )}
-    </ScrollView>
+        }
+        renderItem={({item}) =>
+          item?.id ? (
+            <ProductCard
+              id={item.id}
+              title={item.title}
+              price={item.price}
+              image={item.image}
+              onAddToCart={() => addToCart(item as any)}
+              description={item.description}
+            />
+          ) : null
+        }
+        ListEmptyComponent={
+          isProductsLoading ? (
+            <ActivityIndicator size="large" color="#00A651" />
+          ) : (
+            <Text style={styles.emptyText}>No products found</Text>
+          )
+        }
+      />
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  searchContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  contentContainer: {
     padding: 16,
-  },
-  searchInput: {
-    height: 48,
-    backgroundColor: '#F5F5F5',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    fontSize: 16,
-  },
-  historyContainer: {
-    padding: 16,
-  },
-  historyHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  historyTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#212121',
-  },
-  clearButton: {
-    color: '#FF6B6B',
-    fontSize: 14,
-  },
-  historyTags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  historyTag: {
-    backgroundColor: '#F5F5F5',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  historyTagText: {
-    color: '#757575',
-    fontSize: 14,
+    gap: 10,
+    columnGap: 10,
   },
   categoriesGrid: {
-    padding: 16,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 16,
+    paddingBottom: 16,
   },
-  searchResults: {
-    padding: 16,
-    gap: 16,
+  categoryItem: {
+    flex: 1,
+    padding: 8,
+  },
+  emptyText: {
+    textAlign: 'center',
+    marginVertical: 20,
+    color: '#757575',
+    fontSize: 16,
   },
 });
 
-export default Search;
+export default SearchScreen;

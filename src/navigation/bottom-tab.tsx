@@ -2,14 +2,14 @@ import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
 import {
-  Book,
-  Home,
   HomeIcon,
   SearchIcon,
+  ShoppingBag,
   TrendingUp,
   UserIcon,
 } from 'lucide-react-native';
-import {Order, Profile, Trend, Search} from '@screens/index';
+import {Home, Order, Profile, Trend} from '@screens/index';
+import SearchStack from './search-screen-stack';
 
 const Tab = createBottomTabNavigator();
 
@@ -19,7 +19,9 @@ const SearchTabIcon = ({color}: {color: string}) => (
   <SearchIcon color={color} />
 );
 const TrendTabIcon = ({color}: {color: string}) => <TrendingUp color={color} />;
-const OrderTabIcon = ({color}: {color: string}) => <Book color={color} />;
+const OrderTabIcon = ({color}: {color: string}) => (
+  <ShoppingBag color={color} />
+);
 const ProfileTabIcon = ({color}: {color: string}) => <UserIcon color={color} />;
 
 const BottomTabs = () => {
@@ -28,6 +30,7 @@ const BottomTabs = () => {
       screenOptions={{
         tabBarActiveTintColor: '#00A651',
         tabBarInactiveTintColor: '#9E9E9E',
+        headerShown: false,
       }}>
       <Tab.Screen
         name="Home"
@@ -38,7 +41,7 @@ const BottomTabs = () => {
       />
       <Tab.Screen
         name="Search"
-        component={Search}
+        component={SearchStack}
         options={{
           tabBarIcon: SearchTabIcon,
         }}
