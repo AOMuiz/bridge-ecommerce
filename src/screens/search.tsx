@@ -50,6 +50,10 @@ const SearchScreen = () => {
       product.category.toLowerCase().includes(searchText.toLowerCase()),
   );
 
+  const filteredCategories = categories?.filter(category =>
+    category.toLowerCase().includes(searchText.toLowerCase()),
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Search Bar */}
@@ -71,7 +75,7 @@ const SearchScreen = () => {
         contentContainerStyle={styles.contentContainer}
         ListHeaderComponent={
           <FlatList
-            data={categories}
+            data={filteredCategories || []}
             keyExtractor={(item, index) => `${item}-${index}`}
             numColumns={2}
             renderItem={({item}) => (
