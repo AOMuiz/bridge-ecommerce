@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export const useSearch = () => {
   const [searchText, setSearchText] = useState<string>('');
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null); // Track the timeout
 
   useEffect(() => {
     loadSearchHistory();
@@ -36,7 +37,16 @@ export const useSearch = () => {
   const handleSearch = (text: string) => {
     setSearchText(text);
     if (text.trim()) {
-      saveSearchHistory(text.trim());
+      if (timer) {
+        clearTimeout(timer); // Clear previous timeout if the user is typing
+      }
+
+      // Set a new timeout to save the search history after 3 seconds of inactivity
+      const newTimer = setTimeout(() => {
+        saveSearchHistory(text.trim());
+      }, 3000); // 3000ms = 3 seconds
+
+      setTimer(newTimer); // Save the timer to clear it later
     }
   };
 

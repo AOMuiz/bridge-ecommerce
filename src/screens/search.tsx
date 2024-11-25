@@ -73,6 +73,8 @@ const SearchScreen = () => {
         }
         numColumns={2}
         contentContainerStyle={styles.contentContainer}
+        // eslint-disable-next-line react-native/no-inline-styles
+        columnWrapperStyle={{gap: 10}}
         ListHeaderComponent={
           <FlatList
             data={filteredCategories || []}
